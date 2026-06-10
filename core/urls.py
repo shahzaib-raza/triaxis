@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, layerforge, generate_svg, autolytics, autolytics_search, services
+from .views import home, layerforge, generate_svg, autolytics, autolytics_search, services, about
 
 app_name = "core"
 
@@ -30,5 +30,11 @@ urlpatterns = [
         'services/',
         services,
         name='services'
+    ),
+
+    path(
+        'about/',
+        about,
+        name='about'
     ),
 ]

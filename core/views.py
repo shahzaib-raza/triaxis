@@ -26,6 +26,9 @@ def home(request):
 def services(request):
     return render(request, "services.html")
 
+def about(request):
+    return render(request, "about.html")
+
 MEDIA_ROOT='media'
 os.makedirs(MEDIA_ROOT,exist_ok=True)
 

@@ -260,6 +260,16 @@ def autolytics_search(request):
             'polar_radialaxis_visible': False,
             'polar_radialaxis_showticklabels': False,
         })
+
+        sp.update_layout(
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.15,
+                xanchor="center",
+                x=0.5
+            )
+        )
         
         prc = [p for _, p in data if p is not None]
         plot_div = plot({'data': sp}, output_type='div')

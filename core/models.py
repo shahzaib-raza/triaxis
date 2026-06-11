@@ -5,15 +5,15 @@ from django.db import models
 
 class PortfolioCategory(models.Model):
     class CategoryChoices(models.TextChoices):
-        DESIGN = "design", "Design"
-        DATA_SCRAPING = "data-scraping", "Data Scraping"
-        RESEARCH = "research", "Research"
-        DATA_ENTRY = "data-entry", "Data Entry"
-        AUTOMATION = "automation", "Automation"
-        AI = "ai", "AI"
-        WEB_DEV = "web-development", "Web Development"
-        VIDEO = "video", "Video"
-        TRAINING = "training-education", "Training & Education"
+        DESIGN = "Design", "Design"
+        DATA_SCRAPING = "Data Scraping", "Data Scraping"
+        RESEARCH = "Research", "Research"
+        DATA_ENTRY = "Data Entry", "Data Entry"
+        AUTOMATION = "Automation", "Automation"
+        AI = "AI", "AI"
+        WEB_DEV = "Web Development", "Web Development"
+        VIDEO = "Video", "Video"
+        TRAINING = "Training & Education", "Training & Education"
 
     name = models.CharField(max_length=50, choices=CategoryChoices.choices)
 

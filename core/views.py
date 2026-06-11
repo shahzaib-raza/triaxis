@@ -6,10 +6,9 @@ import os,uuid
 from .utils import _img_array_to_svg
 import cv2
 import numpy as np
-
+from collections import defaultdict, Counter
 from plotly.offline import plot
 from .api_call import get_data_pw, millify
-import pandas as pd
 from plotly import subplots
 import plotly.graph_objs as go
 
@@ -93,15 +92,16 @@ def autolytics_search(request):
         return render(request, "sorry.html")
     
     try:
-        data['price'].apply(get_int)
-        data['year'].apply(get_int)
+        # data['price'].apply(get_int)
+        # data['year'].apply(get_int)
+        data = [(get_int(y), get_int(p)) for y, p in data]
         mm = mm.strip().capitalize()
         mn = mn.strip().capitalize()
         ct = ct.strip().capitalize()
         tit = mm + " " + mn + " (" + ct + ")"
 
         # Formatting data for bar plot
-        fory = data['year'].value_counts()[:]
+        # fory = data['year'].value_counts()[:]
         
         sp = subplots.make_subplots(
                     rows=3,
@@ -112,10 +112,26 @@ def autolytics_search(request):
                         [{"type": "polar"}]]
                 )
         
-        x_vals = data['year']
-        y_vals = data['price']
-        slope, intercept = np.polyfit(x_vals, y_vals, 1)
-        best_fit_line = slope * x_vals + intercept
+        # x_vals = data['year']
+        # y_vals = data['price']
+        
+        x_vals = [y for y, _ in data]
+        y_vals = [p for _, p in data]
+
+        fory = Counter(x_vals)
+
+        n = len(x_vals)
+
+        x_mean = sum(x_vals) / n
+        y_mean = sum(y_vals) / n
+
+        num = sum((x - x_mean) * (y - y_mean) for x, y in zip(x_vals, y_vals))
+        den = sum((x - x_mean) ** 2 for x in x_vals)
+
+        slope = num / den
+        intercept = y_mean - slope * x_mean
+
+        best_fit_line = [slope * x + intercept for x in x_vals]
         
         sp.add_trace(go.Scatter(x=x_vals,
                                 y=y_vals,
@@ -146,9 +162,10 @@ def autolytics_search(request):
                         row=1,
                         col=1
                     )
-        
-        sp.add_trace(go.Bar(x=fory.index.tolist(),
-                            y=fory,
+        x_ = sorted(fory.keys())
+        y_ = [fory[k] for k in x_]
+        sp.add_trace(go.Bar(x=x_,
+                            y=y_,
                             name="No. of "+mn+" for sale per year",
                             marker={'color': 'tomato'},
                             hovertemplate="<br>".join([
@@ -162,11 +179,25 @@ def autolytics_search(request):
                     )
 
         # Formatting data for C_bar 
+        """
         grouped_data = data.groupby(['year'])
         gd_min_price = grouped_data.min().reset_index()['price'].tolist()
         gd_max_price = grouped_data.max().reset_index()['price'].tolist()
         gd_years = grouped_data.mean().reset_index()['year'].tolist()
         gd_mean_price = grouped_data.mean().reset_index()['price'].round(2).tolist()
+        """
+        grouped = defaultdict(list)
+        for year, price in data:
+            grouped[year].append(price)
+        
+        gd_years = sorted(grouped.keys())
+
+        gd_min_price = [min(grouped[y]) for y in gd_years]
+        gd_max_price = [max(grouped[y]) for y in gd_years]
+        gd_mean_price = [
+            round(sum(grouped[y]) / len(grouped[y]), 2)
+            for y in gd_years
+        ]
 
         sp.add_trace(
                 go.Barpolar(r=gd_min_price,
@@ -230,11 +261,11 @@ def autolytics_search(request):
             'polar_radialaxis_showticklabels': False,
         })
         
-        prc = data[data['price'].notna()]['price']
+        prc = [p for _, p in data if p is not None]
         plot_div = plot({'data': sp}, output_type='div')
-        min_price = int(prc.min())
-        avg_price = int(prc.sum() / len(prc))
-        max_price = int(prc.max())
+        min_price = int(min(prc))
+        avg_price = int(sum(prc) / len(prc))
+        max_price = int(max(prc))
         mini = millify(min_price)
         price = millify(avg_price)
         maxi = millify(max_price)
@@ -244,5 +275,6 @@ def autolytics_search(request):
             "min_price": mini,
             "max_price": maxi,
         })
-    except:
+    except Exception as e:
+        print(e)
         return render(request, "autolytics/results/sorry.html")

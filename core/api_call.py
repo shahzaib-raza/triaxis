@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup as Bs
 from concurrent.futures import ThreadPoolExecutor
 import json
 import re
-import pandas as pd
 import datetime
 
 
@@ -26,6 +25,8 @@ def get_last_page_no(mk, md, ct):
         final_dest = 1
     else:
         final_dest = element[len(element) - 1].text
+
+    # print(html)
     return int(final_dest)
 
 
@@ -61,8 +62,14 @@ def fetch_url_data(url):
                 pass
 
         js = [json.loads(obj) for obj in objs]
-        data = [[jp['modelDate'], jp['offers']['price']] for jp in js]
+        data = []
+        for jp in js:
+            try:
+                data.append([jp['modelDate'], jp['offers']['price']])
+            except:
+                pass
         session.close()
+        
         return data
     except Exception as e:
         return []
@@ -88,8 +95,8 @@ def get_data_pw(make, model, city):
         urls = ["https://www.pakwheels.com/used-cars/search/-/ct_" + city + "/mk_" + make + "/md_" + model + "/?page=1"]
 
     data = get_pages_data(urls)
-    df = pd.DataFrame(data, columns=['year', 'price'])
-    return df
+    # df = pd.DataFrame(data, columns=['year', 'price'])
+    return data
 
 
 def millify(num):

@@ -1,3 +1,10 @@
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css"/>
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}"/>
+{% endblock %}
+
 <header class="site-header">
 
     <div class="container navbar">
@@ -16,7 +23,29 @@
 
             <li><a href="/">Home</a></li>
             <li><a href="/services/">Services</a></li>
-            <li><a href="/portfolio/">Portfolio</a></li>
+            <li class="dropdown">
+                <a href="#">Portfolio</a>
+
+                <ul class="dropdown-menu">
+
+                    {% for category in portfolio_categories %}
+
+                        <li>
+                            <a href="/portfolio/{{ category.slug }}/">
+
+                                {% if category.icon %}
+                                    <i class="{{ category.icon }}"></i>
+                                {% endif %}
+
+                                <span>{{ category.name }}</span>
+
+                            </a>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+            </li>
             <li><a href="/about/">About</a></li>
             <li><a href="/layerforge/">LayerForge</a></li>
             <li><a href="/autolytics/">AutoLytics</a></li>

@@ -1,0 +1,141 @@
+/* =========================
+   PORTFOLIO DETAIL (MODERN SaaS)
+========================= */
+
+.pd-hero {
+    padding: 120px 0 60px;
+    text-align: center;
+}
+
+.pd-breadcrumb {
+    color: var(--muted);
+    margin-bottom: 15px;
+}
+
+.pd-breadcrumb a {
+    color: var(--accent-2);
+}
+
+.pd-title {
+    font-size: 3rem;
+    font-weight: 800;
+}
+
+.pd-subtitle {
+    max-width: 700px;
+    margin: 15px auto;
+    color: var(--muted);
+}
+
+.pd-tags {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 999px;
+}
+
+.tag-link {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* COVER */
+.pd-cover-card img {
+    width: 100%;
+    height: 70vh;
+    border-radius: 20px;
+    margin-bottom: 40px;
+}
+
+/* GRID */
+.pd-content {
+    padding: 60px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.pd-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 25px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+}
+
+/* MEDIA */
+.media-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.media-item img,
+.media-item video {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.caption {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 8px;
+}
+
+/* BUTTONS */
+.btn {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    margin-top: 10px;
+}
+
+.btn.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+}
+
+.btn.outline {
+    background: transparent;
+    border: 1px dashed var(--border);
+}
+
+/* CTA */
+.pd-cta {
+    padding: 80px 0;
+}
+
+.cta-box {
+    text-align: center;
+    padding: 60px;
+    background: var(--gradient-glow);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pd-title {
+        font-size: 2.2rem;
+    }
+}

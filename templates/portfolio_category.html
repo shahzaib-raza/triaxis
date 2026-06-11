@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {{ category|title }} Portfolio | Triaxis
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+<!-- =========================
+     HERO SECTION
+========================= -->
+<section class="portfolio-hero">
+
+    <div class="container">
+
+        <div class="hero-badge">
+            PORTFOLIO
+        </div>
+
+        <h1 class="hero-title">
+            {{ category|title }}
+        </h1>
+
+        <p class="hero-subtitle">
+            Explore our {{ category|title }} projects crafted with precision,
+            performance, and modern engineering standards.
+        </p>
+
+        <div class="hero-stats">
+
+            <div class="stat-card">
+                <h3>{{ projects|length }}</h3>
+                <p>Projects Completed</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>100%</h3>
+                <p>Client Satisfaction</p>
+            </div>
+
+            <div class="stat-card">
+                <h3>Triaxis</h3>
+                <p>Quality Standard</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     FEATURED PROJECT
+========================= -->
+
+{% with featured=projects|dictsortreversed:"featured"|first %}
+
+{% if featured and featured.featured %}
+
+<section class="featured-section">
+
+    <div class="container">
+
+        <div class="section-label">FEATURED CASE STUDY</div>
+
+        <div class="featured-card">
+
+            <div class="featured-image">
+                <img src="{{ featured.cover_image.url }}" alt="{{ featured.title }}">
+            </div>
+
+            <div class="featured-content">
+
+                <h2>{{ featured.title }}</h2>
+
+                <p>{{ featured.short_description }}</p>
+
+                <div class="featured-actions">
+
+                    <a href="{% url 'portfolio_detail' featured.slug %}" class="btn-primary">
+                        View Case Study
+                    </a>
+
+                    {% if featured.live_url %}
+                    <a href="{{ featured.live_url }}" target="_blank" class="btn-secondary">
+                        Visit Live
+                    </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+{% endwith %}
+
+
+<!-- =========================
+     PROJECT GRID
+========================= -->
+
+<section class="portfolio-grid-section">
+
+    <div class="container">
+
+        <div class="section-header">
+
+            <h2>All Projects</h2>
+
+            <p>Selected work from our {{ category|title }} portfolio</p>
+
+        </div>
+
+        {% if projects %}
+
+        <div class="portfolio-grid">
+
+            {% for project in projects %}
+
+            <article class="portfolio-card">
+
+                <a href="{% url 'core:portfolio_detail' project.category.slug project.slug %}">
+
+                    <div class="card-image">
+
+                        <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+
+                        <div class="card-overlay"></div>
+
+                    </div>
+
+                    <div class="card-content">
+
+                        <h3>{{ project.title }}</h3>
+
+                        <p>{{ project.short_description|truncatechars:110 }}</p>
+
+                        <div class="card-meta">
+                            <span>View Case Study →</span>
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <h3>No projects found</h3>
+            <p>We are currently adding new {{ category|title }} projects.</p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     CTA SECTION
+========================= -->
+
+<section class="portfolio-cta">
+
+    <div class="container">
+
+        <div class="cta-card">
+
+            <h2>Have a similar project in mind?</h2>
+
+            <p>
+                Let’s build something powerful together.
+                We turn ideas into scalable digital systems.
+            </p>
+
+            <a href="/contact/" class="btn-primary">
+                Start a Project
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+{% endblock %}

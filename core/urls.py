@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, layerforge, generate_svg, autolytics, autolytics_search, services, about
+from .views import home, layerforge, generate_svg, autolytics, autolytics_search, services, about, portfolio_category, portfolio_detail
 
 app_name = "core"
 
@@ -36,5 +36,17 @@ urlpatterns = [
         'about/',
         about,
         name='about'
+    ),
+
+    path(
+        "portfolio/<slug:category>/",
+        portfolio_category,
+        name="portfolio_category"
+    ),
+
+    path(
+        "portfolio/<slug:category>/<slug:slug>/",
+        portfolio_detail,
+        name="portfolio_detail"
     ),
 ]

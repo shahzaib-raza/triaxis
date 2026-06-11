@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 
 from django.views.decorators.csrf import csrf_exempt
 import os,uuid
 from .utils import _img_array_to_svg
+from .models import PortfolioItem, PortfolioCategory
 import cv2
 import numpy as np
 from collections import defaultdict, Counter
@@ -27,6 +28,33 @@ def services(request):
 
 def about(request):
     return render(request, "about.html")
+
+
+def portfolio_category(request, category):
+
+    category_obj = get_object_or_404(
+        PortfolioCategory,
+        slug=category
+    )
+
+    projects = PortfolioItem.objects.filter(
+        category=category_obj
+    )
+
+    return render(request, "portfolio_category.html", {
+        "projects": projects,
+        "category": category_obj
+    })
+
+def portfolio_detail(request, category, slug):
+
+    project = get_object_or_404(PortfolioItem, slug=slug)
+
+    return render(request, "portfolio_detail.html", {
+        "project": project
+    })
+
+# ____________________________________________________________________________________________________________
 
 MEDIA_ROOT='media'
 os.makedirs(MEDIA_ROOT,exist_ok=True)
@@ -64,6 +92,8 @@ def generate_svg(request):
         with open("templates/layerforge/sorry.html", "r", encoding="utf-8") as f:
             html = f.read()
         return HttpResponse(html, content_type="text/html", status=400)
+    
+# _______________________________________________________________________________________________________________
 
 def autolytics(request):
     return render(request,'autolytics/autolytics.html')

@@ -1,5 +1,9 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 from django.views.decorators.csrf import csrf_exempt
 import os,uuid
@@ -37,13 +41,37 @@ def portfolio_category(request, category):
         slug=category
     )
 
+    sub_slug = request.GET.get("sub", "all")
+
     projects = PortfolioItem.objects.filter(
         category=category_obj
     )
 
+    if sub_slug != "all":
+        projects = projects.filter(subcategory__slug=sub_slug)
+
+    projects = projects.order_by("-created_at")
+
+    paginator = Paginator(projects, 10)
+    page = request.GET.get("page", 1)
+    projects_page = paginator.get_page(page)
+
+    # 🔥 AJAX request detection
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        html = render_to_string(
+            "includes/portfolio_cards.html",
+            {"projects": projects_page}
+        )
+        return JsonResponse({
+            "html": html,
+            "has_next": projects_page.has_next()
+        })
+
     return render(request, "portfolio_category.html", {
-        "projects": projects,
-        "category": category_obj
+        "projects": projects_page,
+        "category": category_obj,
+        "subcategories": category_obj.subcategories.all(),
+        "selected_sub": sub_slug,
     })
 
 def portfolio_detail(request, category, slug):

@@ -238,3 +238,28 @@
         grid-template-columns: 1fr;
     }
 }
+
+.portfolio-filter {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.portfolio-filter select {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    
+}
+
+.portfolio-filter option{
+    display: block;
+    padding: 10px 16px;
+
+    color: var(--muted);
+    transition: 0.2s ease;
+}
+
+.load-more-wrapper {
+    text-align: center;
+    margin-top: 40px;
+}

@@ -28,6 +28,20 @@ class PortfolioCategory(models.Model):
         return self.name
 
 
+class PortfolioSubCategory(models.Model):
+    category = models.ForeignKey(
+        PortfolioCategory,
+        on_delete=models.CASCADE,
+        related_name="subcategories"
+    )
+
+    name = models.CharField(max_length=100)
+    slug = models.SlugField()
+
+    def __str__(self):
+        return f"{self.category.name} → {self.name}"
+
+
 class PortfolioItem(models.Model):
 
     title = models.CharField(max_length=200)
@@ -36,6 +50,14 @@ class PortfolioItem(models.Model):
     category = models.ForeignKey(
         "PortfolioCategory",
         on_delete=models.CASCADE
+    )
+
+    subcategory = models.ForeignKey(
+        PortfolioSubCategory,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="projects"
     )
 
     short_description = models.CharField(max_length=300)

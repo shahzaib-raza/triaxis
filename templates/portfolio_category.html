@@ -1,10 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}
-    {{ category|title }} Portfolio | Triaxis
-{% endblock %}
-
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/portfolio.css' %}">
 {% endblock %}
@@ -35,18 +31,8 @@
         <div class="hero-stats">
 
             <div class="stat-card">
-                <h3>{{ projects|length }}</h3>
+                <h3>{{ projects.paginator.count }}</h3>
                 <p>Projects Completed</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>100%</h3>
-                <p>Client Satisfaction</p>
-            </div>
-
-            <div class="stat-card">
-                <h3>Triaxis</h3>
-                <p>Quality Standard</p>
             </div>
 
         </div>
@@ -127,39 +113,30 @@
 
         {% if projects %}
 
-        <div class="portfolio-grid">
+        <div class="portfolio-filter">
 
-            {% for project in projects %}
+            <form method="get" id="filterForm">
 
-            <article class="portfolio-card">
+                <select name="sub" onchange="this.form.submit()">
 
-                <a href="{% url 'core:portfolio_detail' project.category.slug project.slug %}">
+                    <option value="all">All Portfolios</option>
 
-                    <div class="card-image">
+                    {% for sub in subcategories %}
+                        <option value="{{ sub.slug }}"
+                            {% if selected_sub == sub.slug %}selected{% endif %}>
+                            {{ sub.name }}
+                        </option>
+                    {% endfor %}
 
-                        <img src="{{ project.cover_image.url }}" alt="{{ project.title }}">
+                </select>
 
-                        <div class="card-overlay"></div>
+            </form>
 
-                    </div>
+        </div>
 
-                    <div class="card-content">
+        <div id="portfolioGrid" class="portfolio-grid">
 
-                        <h3>{{ project.title }}</h3>
-
-                        <p>{{ project.short_description|truncatechars:110 }}</p>
-
-                        <div class="card-meta">
-                            <span>View Case Study →</span>
-                        </div>
-
-                    </div>
-
-                </a>
-
-            </article>
-
-            {% endfor %}
+            {% include "includes/portfolio_cards.html" %}
 
         </div>
 
@@ -169,6 +146,22 @@
 
             <h3>No projects found</h3>
             <p>We are currently adding new {{ category|title }} projects.</p>
+
+        </div>
+
+        {% endif %}
+
+        {% if projects.has_next %}
+
+        <div class="load-more-wrapper">
+
+            <button id="loadMoreBtn"
+                    data-page="2"
+                    class="btn-secondary">
+
+                Load More
+
+            </button>
 
         </div>
 
@@ -207,4 +200,52 @@
 </section>
 
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+let loadMoreBtn = document.getElementById("loadMoreBtn");
+
+if (loadMoreBtn) {
+
+    loadMoreBtn.addEventListener("click", function () {
+
+        let page = this.getAttribute("data-page");
+
+        console.log("Loading page:", page);
+
+        let url = new URL(window.location.href);
+        url.searchParams.set("page", page);
+
+        fetch(url, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(res => {
+            console.log("Response:", res);
+            return res.json();
+        })
+        .then(data => {
+
+            console.log("HTML received:", data.html);
+
+            document.getElementById("portfolioGrid")
+                .insertAdjacentHTML("beforeend", data.html);
+
+            if (data.has_next) {
+                loadMoreBtn.setAttribute("data-page", parseInt(page) + 1);
+            } else {
+                loadMoreBtn.remove();
+            }
+
+        })
+        .catch(err => console.error("ERROR:", err));
+
+    });
+
+}
+
+</script>
 {% endblock %}

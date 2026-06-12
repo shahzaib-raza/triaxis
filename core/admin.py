@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import PortfolioItem, PortfolioMedia, PortfolioCategory
+from .models import PortfolioItem, PortfolioMedia, PortfolioCategory, PortfolioSubCategory
 
 
 class PortfolioMediaInline(admin.TabularInline):
@@ -11,6 +11,11 @@ class PortfolioMediaInline(admin.TabularInline):
 @admin.register(PortfolioCategory)
 class PortfolioCategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "icon")
+    prepopulated_fields = {"slug": ("name",)}
+
+@admin.register(PortfolioSubCategory)
+class PortfolioSubCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "category")
     prepopulated_fields = {"slug": ("name",)}
 
 

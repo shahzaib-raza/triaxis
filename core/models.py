@@ -42,6 +42,19 @@ class PortfolioSubCategory(models.Model):
         return f"{self.category.name} → {self.name}"
 
 
+ASPECT_RATIO_CHOICES = [
+    ("1/1", "Square (1:1)"),
+    ("4/3", "Standard (4:3)"),
+    ("3/2", "Photo (3:2)"),
+    ("16/9", "Widescreen (16:9)"),
+    ("21/9", "Ultra Wide (21:9)"),
+    ("4/5", "Portrait (4:5)"),
+    ("9/16", "Vertical (9:16)"),
+    ("1.91/1", "Social Banner (1.91:1)"),
+    ("1/1.414", "A4 Document"),
+]
+
+
 class PortfolioItem(models.Model):
 
     title = models.CharField(max_length=200)
@@ -58,6 +71,13 @@ class PortfolioItem(models.Model):
         null=True,
         blank=True,
         related_name="projects"
+    )
+
+    cover_ratio = models.CharField(
+        max_length=20,
+        choices=ASPECT_RATIO_CHOICES,
+        default="16:9",
+        help_text="Select the layout type (e.g., 16:9 for videos, 1:1 for logos)"
     )
 
     short_description = models.CharField(max_length=300)
@@ -110,6 +130,13 @@ class PortfolioMedia(models.Model):
     caption = models.CharField(
         max_length=200,
         blank=True
+    )
+
+    aspect_ratio = models.CharField(
+        max_length=20,
+        choices=ASPECT_RATIO_CHOICES,
+        default="16:9",
+        help_text="Select the layout type (e.g., 16:9 for videos, 1:1 for logos)"
     )
 
     def __str__(self):

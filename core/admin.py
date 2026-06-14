@@ -25,7 +25,8 @@ class PortfolioItemAdmin(admin.ModelAdmin):
     list_display = (
         "title",
         "category",
-        "featured"
+        "featured",
+        "cover_ratio"
     )
 
     prepopulated_fields = {

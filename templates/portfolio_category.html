@@ -31,7 +31,7 @@
         <div class="hero-stats">
 
             <div class="stat-card">
-                <h3>{{ projects.paginator.count }}</h3>
+                <h3 class="counter" data-target="{{ projects.paginator.count }}">0</h3>
                 <p>Projects Completed</p>
             </div>
 
@@ -204,48 +204,106 @@
 
 {% block extra_js %}
 <script>
+console.log("COUNTER SCRIPT LOADED");
+(function () {
 
-let loadMoreBtn = document.getElementById("loadMoreBtn");
+    let countersInitialized = false;
 
-if (loadMoreBtn) {
+    function initCounters() {
 
-    loadMoreBtn.addEventListener("click", function () {
+        const section = document.querySelector(".portfolio-hero");
+        if (!section || countersInitialized) return;
 
-        let page = this.getAttribute("data-page");
+        const counters = section.querySelectorAll(".counter");
 
-        console.log("Loading page:", page);
+        const animateCounters = () => {
 
-        let url = new URL(window.location.href);
-        url.searchParams.set("page", page);
+            counters.forEach(counter => {
 
-        fetch(url, {
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            }
-        })
-        .then(res => {
-            console.log("Response:", res);
-            return res.json();
-        })
-        .then(data => {
+                const target = parseInt(counter.getAttribute("data-target")) || 0;
+                let count = 0;
 
-            console.log("HTML received:", data.html);
+                const duration = 1500; // total animation time in ms
+                const stepTime = Math.max(Math.floor(duration / target), 10);
 
-            document.getElementById("portfolioGrid")
-                .insertAdjacentHTML("beforeend", data.html);
+                const timer = setInterval(() => {
+                    count += Math.ceil(target / (duration / stepTime));
 
-            if (data.has_next) {
-                loadMoreBtn.setAttribute("data-page", parseInt(page) + 1);
-            } else {
-                loadMoreBtn.remove();
-            }
+                    if (count >= target) {
+                        counter.innerText = target + "+";
+                        clearInterval(timer);
+                    } else {
+                        counter.innerText = count;
+                    }
+                }, stepTime);
 
-        })
-        .catch(err => console.error("ERROR:", err));
+            });
 
+            countersInitialized = true;
+        };
+
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    obs.disconnect(); // 🔥 ensures it runs only once
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        observer.observe(section);
+    }
+
+    // ✅ Run on initial page load
+    document.addEventListener("DOMContentLoaded", function () {
+        initCounters();
     });
 
-}
 
+    // ==========================
+    // AJAX LOAD MORE HANDLER
+    // ==========================
+
+    let loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    if (loadMoreBtn) {
+
+        loadMoreBtn.addEventListener("click", function () {
+
+            let page = this.getAttribute("data-page");
+
+            let url = new URL(window.location.href);
+            url.searchParams.set("page", page);
+
+            fetch(url, {
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                document.getElementById("portfolioGrid")
+                    .insertAdjacentHTML("beforeend", data.html);
+
+                // 🔥 Re-check counters (safe, won't re-run animation)
+                initCounters();
+
+                if (data.has_next) {
+                    loadMoreBtn.setAttribute("data-page", parseInt(page) + 1);
+                } else {
+                    loadMoreBtn.remove();
+                }
+
+            })
+            .catch(err => console.error("ERROR:", err));
+
+        });
+
+    }
+
+})();
 </script>
 {% endblock %}

@@ -78,8 +78,11 @@ def portfolio_detail(request, category, slug):
 
     project = get_object_or_404(PortfolioItem, slug=slug)
 
+    total_projects = PortfolioItem.objects.count()
+
     return render(request, "portfolio_detail.html", {
-        "project": project
+        "project": project,
+        "total_projects": total_projects
     })
 
 # ____________________________________________________________________________________________________________

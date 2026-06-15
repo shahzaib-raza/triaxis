@@ -231,17 +231,21 @@ category-{{ project.category.slug }}
 <div class="container proof-grid">
 
     <div class="proof-item">
-        <h3>50+</h3>
+        <h3 class="counter" data-target="{{ total_projects }}">0</h3>
         <p>Projects Delivered</p>
     </div>
 
     <div class="proof-item">
-        <h3>95%</h3>
+        <h3>
+            <span class="counter" data-target="100">0</span>%
+        </h3>
         <p>Client Satisfaction</p>
     </div>
 
     <div class="proof-item">
-        <h3>24h</h3>
+        <h3>
+            <span class="counter" data-target="24">0</span>h
+        </h3>
         <p>Response Time</p>
     </div>
 
@@ -274,5 +278,61 @@ category-{{ project.category.slug }}
 
 
 </section>
+
+
+{% block extra_js %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const counters = document.querySelectorAll(".counter");
+    let hasAnimated = false;
+
+    const animateCounters = () => {
+        if (hasAnimated) return;
+
+        counters.forEach(counter => {
+            const target = +counter.getAttribute("data-target");
+            let count = 0;
+
+            const increment = target / 150; // speed control
+
+            const updateCount = () => {
+                if (count < target) {
+                    count += increment;
+                    counter.innerText = Math.ceil(count);
+                    requestAnimationFrame(updateCount);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+
+            updateCount();
+        });
+
+        hasAnimated = true;
+    };
+
+    // 👇 Trigger when section comes into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounters();
+            }
+        });
+    }, {
+        threshold: 0.5 // trigger when 50% visible
+    });
+
+    const section = document.querySelector(".proof-grid");
+    if (section) {
+        observer.observe(section);
+    }
+
+});
+</script>
+
+{% endblock %}
+
 
 {% endblock %}

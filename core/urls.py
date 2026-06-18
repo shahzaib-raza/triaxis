@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, layerforge, generate_svg, autolytics, autolytics_search, services, about, portfolio_category, portfolio_detail
+from .views import *
 
 app_name = "core"
 
@@ -48,5 +48,11 @@ urlpatterns = [
         "portfolio/<slug:category>/<slug:slug>/",
         portfolio_detail,
         name="portfolio_detail"
+    ),
+
+    path(
+        'order/',
+        create_order,
+        name='order'
     ),
 ]

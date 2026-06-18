@@ -1,5 +1,7 @@
 from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.core.mail import send_mail
+from django.conf import settings
 from django.http import HttpResponse
 
 from django.http import JsonResponse
@@ -8,7 +10,7 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 import os,uuid
 from .utils import _img_array_to_svg
-from .models import PortfolioItem, PortfolioCategory
+from .models import PortfolioItem, PortfolioCategory, PortfolioSubCategory, Order, OrderItem
 import cv2
 import numpy as np
 from collections import defaultdict, Counter
@@ -84,6 +86,72 @@ def portfolio_detail(request, category, slug):
         "project": project,
         "total_projects": total_projects
     })
+
+# ____________________________________________________________________________________________________________
+
+
+def create_order(request):
+
+    categories = PortfolioCategory.objects.prefetch_related("subcategories")
+
+    if request.method == "POST":
+
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+
+        order = Order.objects.create(
+            name=name,
+            email=email,
+            phone=phone
+        )
+
+        items = request.POST.getlist("items[]")
+
+        order_summary = ""
+
+        for item in items:
+            # format: subcategory_id|quantity
+            sub_id, qty = item.split("|")
+
+            sub = PortfolioSubCategory.objects.get(id=sub_id)
+
+            order_item = OrderItem.objects.create(
+                order=order,
+                category=sub.category,
+                subcategory=sub,
+                quantity=int(qty),
+                price=sub.price
+            )
+
+            order_summary += f"{sub.name} x {qty} = {order_item.total_price()}\n"
+
+         # ✅ SEND EMAIL HERE (AFTER LOOP)
+        send_mail(
+            subject=f"New Order #{order.id}",
+            message=f"""
+                New Order Received
+
+                Client: {name}
+                Email: {email}
+                Phone: {phone}
+
+                Items:
+                {order_summary}
+
+                Total: {order.total_amount()}
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.DEFAULT_FROM_EMAIL],
+            fail_silently=False
+        )
+
+        return redirect("success_page")
+
+    return render(request, "order.html", {
+        "categories": categories
+    })
+
 
 # ____________________________________________________________________________________________________________
 

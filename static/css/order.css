@@ -1,0 +1,119 @@
+.order-section {
+    padding-top: 140px;
+}
+
+#order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.order-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 100px 120px;
+    gap: 16px;
+    align-items: center;
+}
+
+.order-item select,
+.order-item input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+}
+
+.order-total {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.order-total h2 {
+    font-size: 2.5rem;
+    margin-top: 10px;
+}
+
+.submit-btn {
+    margin-top: 30px;
+    width: 100%;
+}
+
+
+
+/* =========================
+   FORM STYLING (PREMIUM)
+========================= */
+
+.client-info {
+    margin-top: 50px;
+    padding: 32px;
+    gap: 24px;
+}
+
+.form-title {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+/* INPUT GROUP (FLOATING LABEL) */
+.input-group {
+    position: relative;
+}
+
+/* INPUT FIELD */
+.input-group input {
+
+    width: 100%;
+    padding: 16px 14px;
+
+    border-radius: 12px;
+
+    border: 1px solid var(--border);
+
+    background: rgba(255,255,255,0.04);
+
+    color: var(--text);
+    font-size: 0.95rem;
+
+    outline: none;
+
+    transition: var(--transition);
+}
+
+/* LABEL */
+.input-group label {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    color: var(--muted);
+    font-size: 0.9rem;
+
+    pointer-events: none;
+
+    transition: 0.2s ease;
+}
+
+/* FOCUS STATE */
+.input-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    background: rgba(255,255,255,0.06);
+}
+
+/* FLOAT LABEL WHEN ACTIVE */
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+
+    top: -8px;
+    left: 10px;
+
+    background: var(--bg);
+    padding: 0 6px;
+
+    font-size: 0.75rem;
+    color: var(--accent);
+}

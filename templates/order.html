@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/order.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="order-section">
+
+
+<div class="container">
+
+    <!-- 🔥 HERO -->
+    <div class="section-heading">
+        <span>Start Your Project</span>
+        <h2 class="gradient-text">Build Your Custom Order</h2>
+        <p>Choose services, set quantities, and get instant pricing.</p>
+    </div>
+
+    <form method="POST" id="order-form">
+        {% csrf_token %}
+
+        <!-- 🧾 ORDER BUILDER -->
+        <div id="order-items"></div>
+
+        <button type="button" id="add-item" class="btn-secondary">
+            + Add Service
+        </button>
+
+        <!-- 💰 TOTAL -->
+        <div class="order-total card">
+            <h3>Total Amount</h3>
+            <h2 id="total">0</h2>
+        </div>
+
+        <!-- 👤 CLIENT INFO -->
+        <div class="card client-info">
+
+            <h3 class="form-title">Your Details</h3>
+
+            <div class="input-group">
+                <input type="text" name="name" required>
+                <label>Your Name</label>
+            </div>
+
+            <div class="input-group">
+                <input type="email" name="email" required>
+                <label>Email Address</label>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="phone" required>
+                <label>Phone Number</label>
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn-primary submit-btn">
+            🚀 Place Order
+        </button>
+
+    </form>
+
+</div>
+
+
+</section>
+
+{% block extra_js %}
+
+<script>
+
+const subcategories = {
+    {% for cat in categories %}
+        {% for sub in cat.subcategories.all %}
+            "{{sub.id}}": {
+                name: "{{sub.name}}",
+                price: {{sub.price}},
+                category: "{{cat.id}}"
+            },
+        {% endfor %}
+    {% endfor %}
+};
+
+const categories = {
+    {% for cat in categories %}
+        "{{cat.id}}": {
+            name: "{{cat.name}}"
+        },
+    {% endfor %}
+};
+
+function createItem() {
+
+    const div = document.createElement("div");
+    div.classList.add("order-item", "card");
+
+    div.innerHTML = `
+        <select class="category">
+            <option>Select Category</option>
+            ${Object.entries(categories).map(([id, c]) =>
+                `<option value="${id}">${c.name}</option>`
+            ).join("")}
+        </select>
+
+        <select class="subcategory"></select>
+
+        <input type="number" class="qty" value="1" min="1">
+
+        <span class="price">0</span>
+    `;
+
+    document.getElementById("order-items").appendChild(div);
+
+    attachEvents(div);
+}
+
+function attachEvents(item) {
+
+    const catSelect = item.querySelector(".category");
+    const subSelect = item.querySelector(".subcategory");
+    const qtyInput = item.querySelector(".qty");
+
+    catSelect.addEventListener("change", () => {
+
+        const catId = catSelect.value;
+
+        const filtered = Object.entries(subcategories)
+            .filter(([id, s]) => s.category == catId);
+
+        subSelect.innerHTML = filtered.map(([id, s]) =>
+            `<option value="${id}">${s.name} ($${s.price})</option>`
+        ).join("");
+
+        update(item);
+    });
+
+    subSelect.addEventListener("change", () => update(item));
+    qtyInput.addEventListener("input", () => update(item));
+}
+
+function update(item) {
+
+    const subId = item.querySelector(".subcategory").value;
+    const qty = parseInt(item.querySelector(".qty").value || 0);
+
+    if (!subId) return;
+
+    const price = subcategories[subId].price * qty;
+
+    item.querySelector(".price").innerText = price;
+
+    updateTotal();
+}
+
+function updateTotal() {
+
+    let total = 0;
+
+    document.querySelectorAll(".order-item").forEach(item => {
+        total += parseFloat(item.querySelector(".price").innerText || 0);
+    });
+
+    document.getElementById("total").innerText = total;
+}
+
+// INIT
+document.getElementById("add-item").addEventListener("click", createItem);
+
+// Add first item automatically
+createItem();
+
+</script>
+
+{% endblock %}
+
+
+{% endblock %}
+
+

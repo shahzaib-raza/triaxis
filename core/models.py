@@ -38,6 +38,8 @@ class PortfolioSubCategory(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField()
 
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
     def __str__(self):
         return f"{self.category.name} → {self.name}"
 
@@ -141,3 +143,35 @@ class PortfolioMedia(models.Model):
 
     def __str__(self):
         return f"{self.portfolio.title} - {self.media_type}"
+    
+
+class Order(models.Model):
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def total_amount(self):
+        return sum(item.total_price() for item in self.items.all())
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.name}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+
+    category = models.ForeignKey(PortfolioCategory, on_delete=models.SET_NULL, null=True)
+    subcategory = models.ForeignKey(PortfolioSubCategory, on_delete=models.SET_NULL, null=True)
+
+    quantity = models.PositiveIntegerField()
+
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def total_price(self):
+        return self.price * self.quantity

@@ -9,66 +9,77 @@
 
 <section class="order-section">
 
+<form id="order-form" action="{% url 'core:order' %}" method="POST">
+    {% csrf_token %}
+    <div class="container">
 
-<div class="container">
+        <!-- 🔥 HERO -->
+        <div class="section-heading">
+            <span>Start Your Project</span>
+            <h2 class="gradient-text">Build Your Custom Order</h2>
+            <p>Choose services, set quantities, and get instant pricing.</p>
+        </div>
 
-    <!-- 🔥 HERO -->
-    <div class="section-heading">
-        <span>Start Your Project</span>
-        <h2 class="gradient-text">Build Your Custom Order</h2>
-        <p>Choose services, set quantities, and get instant pricing.</p>
+        <div class="order-layout">
+
+            <!-- LEFT SIDE -->
+            <div class="order-builder">
+
+                <div id="order-items"></div>
+
+                <button type="button" id="add-item" class="btn-secondary">
+                    + Add Service
+                </button>
+
+                <!-- CLIENT INFO -->
+                <div class="card client-info">
+                    <h3>Your Details</h3>
+
+                    <div class="input-group">
+                        <input type="text" name="name" required placeholder=" ">
+                        <label>Your Name</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" name="email" required placeholder=" ">
+                        <label>Email</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="phone" required placeholder=" ">
+                        <label>Phone</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary submit-btn">
+                    🚀 Place Order
+                </button>
+
+            </div>
+
+            <!-- RIGHT SIDE (🔥 LIVE PANEL) -->
+            <div class="order-summary card">
+
+                <h3>Order Summary</h3>
+
+                <div id="summary-items"></div>
+
+                <div class="summary-total">
+                    <span>Total</span>
+                    <h2 id="total">0</h2>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-
-    <form method="POST" id="order-form">
-        {% csrf_token %}
-
-        <!-- 🧾 ORDER BUILDER -->
-        <div id="order-items"></div>
-
-        <button type="button" id="add-item" class="btn-secondary">
-            + Add Service
-        </button>
-
-        <!-- 💰 TOTAL -->
-        <div class="order-total card">
-            <h3>Total Amount</h3>
-            <h2 id="total">0</h2>
-        </div>
-
-        <!-- 👤 CLIENT INFO -->
-        <div class="card client-info">
-
-            <h3 class="form-title">Your Details</h3>
-
-            <div class="input-group">
-                <input type="text" name="name" required>
-                <label>Your Name</label>
-            </div>
-
-            <div class="input-group">
-                <input type="email" name="email" required>
-                <label>Email Address</label>
-            </div>
-
-            <div class="input-group">
-                <input type="text" name="phone" required>
-                <label>Phone Number</label>
-            </div>
-
-        </div>
-
-        <button type="submit" class="btn-primary submit-btn">
-            🚀 Place Order
-        </button>
-
-    </form>
-
-</div>
+</form>
 
 
 </section>
 
-{% block extra_js %}
+{% block extra_js_2 %}
 
 <script>
 
@@ -110,6 +121,8 @@ function createItem() {
         <input type="number" class="qty" value="1" min="1">
 
         <span class="price">0</span>
+
+        <span class="remove-btn" style="cursor:pointer; margin-left:10px;">✕</span>
     `;
 
     document.getElementById("order-items").appendChild(div);
@@ -122,6 +135,7 @@ function attachEvents(item) {
     const catSelect = item.querySelector(".category");
     const subSelect = item.querySelector(".subcategory");
     const qtyInput = item.querySelector(".qty");
+    const removeBtn = item.querySelector(".remove-btn");
 
     catSelect.addEventListener("change", () => {
 
@@ -139,6 +153,12 @@ function attachEvents(item) {
 
     subSelect.addEventListener("change", () => update(item));
     qtyInput.addEventListener("input", () => update(item));
+
+    // ✅ REMOVE ITEM
+    removeBtn.addEventListener("click", () => {
+        item.remove();
+        updateTotal();
+    });
 }
 
 function update(item) {
@@ -158,12 +178,32 @@ function update(item) {
 function updateTotal() {
 
     let total = 0;
+    const summary = document.getElementById("summary-items");
+
+    summary.innerHTML = "";
 
     document.querySelectorAll(".order-item").forEach(item => {
-        total += parseFloat(item.querySelector(".price").innerText || 0);
+
+        const subId = item.querySelector(".subcategory").value;
+        const qty = item.querySelector(".qty").value;
+        const price = parseFloat(item.querySelector(".price").innerText || 0);
+
+        if (!subId) return;
+
+        total += price;
+
+        const row = document.createElement("div");
+        row.classList.add("summary-row");
+
+        row.innerHTML = `
+            <span>${subcategories[subId].name} x ${qty}</span>
+            <span>$${price}</span>
+        `;
+
+        summary.appendChild(row);
     });
 
-    document.getElementById("total").innerText = total;
+    document.getElementById("total").innerText = `$${total}`;
 }
 
 // INIT

@@ -55,4 +55,10 @@ urlpatterns = [
         create_order,
         name='order'
     ),
+
+    path(
+        'order/success/',
+        success_page,
+        name='success_page'
+    ),
 ]

@@ -89,8 +89,14 @@ def portfolio_detail(request, category, slug):
 
 # ____________________________________________________________________________________________________________
 
+def success_page(request):
+    return render(request, "success.html")
+
 
 def create_order(request):
+
+    print("METHOD:", request.method)
+    print("POST:", request.POST)
 
     categories = PortfolioCategory.objects.prefetch_related("subcategories")
 
@@ -146,7 +152,7 @@ def create_order(request):
             fail_silently=False
         )
 
-        return redirect("success_page")
+        return redirect("core:success_page")
 
     return render(request, "order.html", {
         "categories": categories

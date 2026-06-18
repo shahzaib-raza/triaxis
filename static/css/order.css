@@ -9,22 +9,6 @@
     margin-bottom: 30px;
 }
 
-.order-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr 100px 120px;
-    gap: 16px;
-    align-items: center;
-}
-
-.order-item select,
-.order-item input {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,0.05);
-    color: var(--text);
-}
-
 .order-total {
     margin-top: 30px;
     text-align: center;
@@ -116,4 +100,77 @@
 
     font-size: 0.75rem;
     color: var(--accent);
+}
+
+
+/* LAYOUT */
+.order-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* STICKY SUMMARY */
+.order-summary {
+    position: sticky;
+    top: 120px;
+}
+
+/* ORDER ITEM CARD */
+.order-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px auto;
+    gap: 12px;
+    align-items: center;
+
+    padding: 18px;
+    border-radius: 14px;
+
+    transition: var(--transition);
+}
+
+.order-item:hover {
+    transform: scale(1.01);
+}
+
+/* REMOVE BUTTON */
+.remove-btn {
+    cursor: pointer;
+    color: #ef4444;
+    font-size: 14px;
+}
+
+/* SUMMARY ITEMS */
+#summary-items {
+    margin-top: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--muted);
+}
+
+.summary-total {
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+}
+
+/* ANIMATION */
+.order-item {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

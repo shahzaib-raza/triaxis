@@ -13,6 +13,8 @@
     {% csrf_token %}
     <div class="container">
 
+        <input type="hidden" name="items" id="items-input">
+
         <!-- 🔥 HERO -->
         <div class="section-heading">
             <span>Start Your Project</span>
@@ -130,6 +132,21 @@ function createItem() {
     attachEvents(div);
 }
 
+function collectItems() {
+    const items = [];
+
+    document.querySelectorAll(".order-item").forEach(item => {
+        const subId = item.querySelector(".subcategory").value;
+        const qty = item.querySelector(".qty").value;
+
+        if (!subId) return;
+
+        items.push(`${subId}|${qty}`);
+    });
+
+    document.getElementById("items-input").value = JSON.stringify(items);
+}
+
 function attachEvents(item) {
 
     const catSelect = item.querySelector(".category");
@@ -211,6 +228,10 @@ document.getElementById("add-item").addEventListener("click", createItem);
 
 // Add first item automatically
 createItem();
+
+document.getElementById("order-form").addEventListener("submit", function () {
+    collectItems();
+});
 
 </script>
 

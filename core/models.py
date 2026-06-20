@@ -146,6 +146,7 @@ class PortfolioMedia(models.Model):
     
 
 class Order(models.Model):
+    
     name = models.CharField(max_length=150)
     email = models.EmailField()
     phone = models.CharField(max_length=20)

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from django.http import JsonResponse
+import json
 from django.template.loader import render_to_string
 
 from django.views.decorators.csrf import csrf_exempt
@@ -112,7 +113,7 @@ def create_order(request):
             phone=phone
         )
 
-        items = request.POST.getlist("items[]")
+        items = json.loads(request.POST.get("items", "[]"))
 
         order_summary = ""
 
@@ -132,7 +133,7 @@ def create_order(request):
 
             order_summary += f"{sub.name} x {qty} = {order_item.total_price()}\n"
 
-         # ✅ SEND EMAIL HERE (AFTER LOOP)
+        # ✅ SEND EMAIL HERE (AFTER LOOP)
         send_mail(
             subject=f"New Order #{order.id}",
             message=f"""
@@ -149,6 +150,38 @@ def create_order(request):
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.DEFAULT_FROM_EMAIL],
+            fail_silently=False
+        )
+
+        send_mail(
+            subject=f"Thank you for your order #{order.id}",
+            message=f"""
+                Hi {name},
+
+                Thank you for placing your order with us.
+
+                We have successfully received your request and our team will start processing it shortly.
+
+                -------------------------
+                ORDER DETAILS
+                -------------------------
+
+                Order ID: #{order.id}
+
+                Items:
+                {order_summary}
+
+                Total: {order.total_amount()}
+
+                We will contact you soon if we need any further details.
+
+                If you have any questions, feel free to reply to this email.
+
+                Best regards,  
+                Team TriAxis
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
             fail_silently=False
         )
 

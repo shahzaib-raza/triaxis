@@ -174,3 +174,36 @@
         transform: translateY(0);
     }
 }
+
+/* =========================
+   MOBILE LAYOUT
+========================= */
+@media (max-width: 768px) {
+
+    .order-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* Remove sticky behavior on mobile */
+    .order-summary {
+        position: static;
+        order: 2;
+    }
+
+    /* Builder comes first */
+    .order-builder {
+        order: 1;
+    }
+
+    /* Make each order item stack nicely */
+    .order-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .order-item select,
+    .order-item input {
+        width: 100%;
+    }
+}

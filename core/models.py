@@ -145,19 +145,52 @@ class PortfolioMedia(models.Model):
         return f"{self.portfolio.title} - {self.media_type}"
     
 
+
 class Order(models.Model):
-    
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PAID = "paid", "Paid"
+        FAILED = "failed", "Failed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    class PaymentMethod(models.TextChoices):
+        CARD = "card", "Credit / Debit Card"
+        PAYPAL = "paypal", "PayPal"
+        BANK = "bank", "Bank Transfer"
+        JAZZCASH = "jazzcash", "JazzCash"
+        EASYPAISA = "easypaisa", "Easypaisa"
+
     name = models.CharField(max_length=150)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
 
+    country = models.CharField(max_length=100, blank=True)
+    company = models.CharField(max_length=150, blank=True)
+    notes = models.TextField(blank=True)
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        blank=True
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    transaction_id = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
     def total_amount(self):
         return sum(item.total_price() for item in self.items.all())
-
-    def __str__(self):
-        return f"Order #{self.id} - {self.name}"
 
 
 class OrderItem(models.Model):

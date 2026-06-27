@@ -56,6 +56,9 @@ urlpatterns = [
         name='order'
     ),
 
+    path("checkout/", checkout, name="checkout"),
+    path("place-order/", place_order, name="place_order"),
+
     path(
         'order/success/',
         success_page,

@@ -9,7 +9,7 @@
 
 <section class="order-section">
 
-<form id="order-form" action="{% url 'core:order' %}" method="POST">
+<form id="order-form" action="{% url 'core:checkout' %}" method="POST">
     {% csrf_token %}
     <div class="container">
 
@@ -54,7 +54,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary submit-btn">
-                    🚀 Place Order
+                    Continue to Checkout →
                 </button>
 
             </div>

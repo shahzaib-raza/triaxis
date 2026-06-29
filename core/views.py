@@ -1,6 +1,10 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
+
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+
 from django.conf import settings
 from django.http import HttpResponse
 from django.contrib import messages
@@ -326,23 +330,22 @@ def place_order(request):
     # Redirect according to payment method
 
     if payment_method == "card":
-        return redirect("core:card_checkout", order_id=order.id)
+        return redirect("core:payment_success", order_id=order.id)
 
     elif payment_method == "paypal":
-        return redirect("core:paypal_checkout", order_id=order.id)
+        return redirect("core:payment_success", order_id=order.id)
 
     elif payment_method == "jazzcash":
-        return redirect("core:jazzcash_checkout", order_id=order.id)
+        return redirect("core:payment_success", order_id=order.id)
 
     elif payment_method == "easypaisa":
-        return redirect("core:easypaisa_checkout", order_id=order.id)
+        return redirect("core:payment_success", order_id=order.id)
 
     elif payment_method == "bank":
-        return redirect("core:bank_transfer", order_id=order.id)
+        return redirect("core:payment_success", order_id=order.id)
 
     messages.error(request, "Invalid payment method.")
     return redirect("core:checkout")
-
 
 
 def payment_success(request, order_id):
@@ -389,31 +392,27 @@ def payment_success(request, order_id):
     )
 
     # Customer email
-    send_mail(
-        subject=f"Payment Received - Order #{order.id}",
-        message=f"""
-    Hi {order.name},
+    context = {
+        "order": order,
+        "order_summary": order_summary,
+    }
 
-    Thank you for your payment.
-
-    Your order has been received successfully.
-
-    Order #{order.id}
-
-    {order_summary}
-
-    Total:
-    ${order.total_amount}
-
-    We'll begin working on your project shortly.
-
-    Regards,
-    TriAxis
-    """,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[order.email],
-        fail_silently=False,
+    html_message = render_to_string(
+        "order_confirmation.html",
+        context,
     )
+
+    plain_message = strip_tags(html_message)
+
+    email = EmailMultiAlternatives(
+        subject=f"Payment Received • Order #{order.id}",
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.email],
+    )
+
+    email.attach_alternative(html_message, "text/html")
+    email.send()
 
     return redirect("core:success_page")
 

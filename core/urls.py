@@ -57,11 +57,15 @@ urlpatterns = [
     ),
 
     path("checkout/", checkout, name="checkout"),
+
     path("place-order/", place_order, name="place_order"),
 
     path(
-        'order/success/',
-        success_page,
-        name='success_page'
+        'order/success/<int:order_id>/',
+        payment_success,
+        name='payment_success'
     ),
+
+    path("success/", success_page, name="success_page"),
+    
 ]

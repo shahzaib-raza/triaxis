@@ -178,7 +178,7 @@ def create_order(request):
                 If you have any questions, feel free to reply to this email.
 
                 Best regards,  
-                Team TriAxis
+                Team zafium
             """,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],

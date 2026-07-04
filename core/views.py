@@ -1,8 +1,14 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
+
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+
 from django.conf import settings
 from django.http import HttpResponse
+from django.contrib import messages
+from decimal import Decimal
 
 from django.http import JsonResponse
 import json
@@ -191,6 +197,224 @@ def create_order(request):
         "categories": categories
     })
 
+
+def checkout(request):
+
+    # User should only arrive here from order.html
+    if request.method != "POST":
+        return redirect("core:order")
+
+    name = request.POST.get("name")
+    email = request.POST.get("email")
+    phone = request.POST.get("phone")
+
+    raw_items = request.POST.get("items", "[]")
+
+    try:
+        items = json.loads(raw_items)
+    except json.JSONDecodeError:
+        messages.error(request, "Invalid order.")
+        return redirect("core:order")
+
+    checkout_items = []
+    grand_total = Decimal("0.00")
+
+    for item in items:
+
+        try:
+            sub_id, qty = item.split("|")
+            qty = int(qty)
+
+            if qty < 1:
+                continue
+
+            sub = PortfolioSubCategory.objects.select_related(
+                "category"
+            ).get(pk=sub_id)
+
+        except Exception:
+            continue
+
+        line_total = sub.price * qty
+
+        checkout_items.append({
+            "subcategory_id": sub.id,
+            "category": sub.category.name,
+            "subcategory": sub.name,
+            "quantity": qty,
+            "price": str(sub.price),
+            "total": str(line_total),
+        })
+
+        grand_total += line_total
+
+    if not checkout_items:
+        messages.error(request, "Please add at least one service.")
+        return redirect("core:order")
+
+    # Save checkout data in session
+    request.session["checkout"] = {
+
+        "customer": {
+            "name": name,
+            "email": email,
+            "phone": phone,
+        },
+
+        "items": checkout_items,
+
+        "total": str(grand_total),
+    }
+
+    return render(
+        request,
+        "checkout.html",
+        {
+            "customer": request.session["checkout"]["customer"],
+            "items": checkout_items,
+            "total": grand_total,
+        },
+    )
+
+
+def place_order(request):
+
+    if request.method != "POST":
+        return redirect("core:order")
+
+    checkout = request.session.get("checkout")
+
+    if not checkout:
+        messages.error(request, "Your checkout session has expired.")
+        return redirect("core:order")
+
+    customer = checkout["customer"]
+    items = checkout["items"]
+
+    payment_method = request.POST.get("payment_method")
+
+    if not payment_method:
+        messages.error(request, "Please select a payment method.")
+        return redirect("core:checkout")
+
+    # Create Order
+    order = Order.objects.create(
+        name=customer["name"],
+        email=customer["email"],
+        phone=customer["phone"],
+        payment_method=payment_method,
+        payment_status="pending",
+    )
+
+    # Create Order Items
+    for item in items:
+
+        sub = PortfolioSubCategory.objects.select_related(
+            "category"
+        ).get(pk=item["subcategory_id"])
+
+        OrderItem.objects.create(
+            order=order,
+            category=sub.category,
+            subcategory=sub,
+            quantity=item["quantity"],
+            price=item["price"],
+        )
+
+    # Store order id in session
+    request.session["order_id"] = order.id
+
+    # Clear checkout session
+    del request.session["checkout"]
+
+    # Redirect according to payment method
+
+    if payment_method == "card":
+        return redirect("core:payment_success", order_id=order.id)
+
+    elif payment_method == "paypal":
+        return redirect("core:payment_success", order_id=order.id)
+
+    elif payment_method == "jazzcash":
+        return redirect("core:payment_success", order_id=order.id)
+
+    elif payment_method == "easypaisa":
+        return redirect("core:payment_success", order_id=order.id)
+
+    elif payment_method == "bank":
+        return redirect("core:payment_success", order_id=order.id)
+
+    messages.error(request, "Invalid payment method.")
+    return redirect("core:checkout")
+
+
+def payment_success(request, order_id):
+
+    order = get_object_or_404(Order, pk=order_id)
+
+    order.payment_status = "paid"
+    order.save()
+
+    order_summary = ""
+
+    for item in order.items.all():
+        order_summary += (
+            f"{item.subcategory.name} "
+            f"x {item.quantity} "
+            f"= ${item.total_price()}\n"
+        )
+
+    # Admin email
+    send_mail(
+        subject=f"New Paid Order #{order.id}",
+        message=f"""
+    New Paid Order
+
+    Customer:
+    {order.name}
+
+    Email:
+    {order.email}
+
+    Phone:
+    {order.phone}
+
+    Items:
+
+    {order_summary}
+
+    Total:
+    ${order.total_amount}
+    """,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[settings.DEFAULT_FROM_EMAIL],
+        fail_silently=False,
+    )
+
+    # Customer email
+    context = {
+        "order": order,
+        "order_summary": order_summary,
+    }
+
+    html_message = render_to_string(
+        "order_confirmation.html",
+        context,
+    )
+
+    plain_message = strip_tags(html_message)
+
+    email = EmailMultiAlternatives(
+        subject=f"Payment Received • Order #{order.id}",
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.email],
+    )
+
+    email.attach_alternative(html_message, "text/html")
+    email.send()
+
+    return redirect("core:success_page")
 
 # ____________________________________________________________________________________________________________
 
